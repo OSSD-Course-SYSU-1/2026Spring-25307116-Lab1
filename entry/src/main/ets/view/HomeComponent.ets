@@ -29,6 +29,7 @@ import { CommonConstants as Const } from '../common/constants/CommonConstants';
 import AchievementInfo from '../viewmodel/AchievementInfo';
 import KnowledgeCard from './KnowledgeCard';
 import { KnowledgeItem, getDailyKnowledge } from '../model/KnowledgeData';
+import { CustomTaskDef, getCustomTaskSync, initCustomTaskCache } from '../model/CustomTaskStore';
 
 const WHITE_COLOR_0X = 255;
 
@@ -84,14 +85,41 @@ export default struct HomeIndex {
     }
     else {
       // edit task 长按
-      let editTaskStr: string = JSON.stringify(TaskMapById[item.taskID - 1]);
-      let editTask: ITaskItem = JSON.parse(editTaskStr);
-      editTask.targetValue = item?.targetValue;
-      editTask.isAlarm = item.isAlarm;
-      editTask.startTime = item.startTime;
-      editTask.frequency = item.frequency;
-      editTask.isOpen = item.isOpen;
-      router.pushUrl({ url: 'pages/TaskEditPage', params: { params: JSON.stringify(editTask) } });
+      if (item.taskID >= 1 && item.taskID <= 7) {
+        let editTaskStr: string = JSON.stringify(TaskMapById[item.taskID - 1]);
+        let editTask: ITaskItem = JSON.parse(editTaskStr);
+        editTask.targetValue = item?.targetValue;
+        editTask.isAlarm = item.isAlarm;
+        editTask.startTime = item.startTime;
+        editTask.frequency = item.frequency;
+        editTask.isOpen = item.isOpen;
+        router.pushUrl({ url: 'pages/TaskEditPage', params: { params: JSON.stringify(editTask) } });
+      } else {
+        // 自定义任务
+        const def = getCustomTaskSync(item.taskID);
+        if (def) {
+          let editTask: ITaskItem = {
+            taskID: item.taskID,
+            taskName: $r('app.string.empty'),
+            isOpen: item.isOpen,
+            unit: def.unit,
+            icon: $r('app.media.ic_task_morning'),
+            dialogBg: $r('app.media.ic_dialog_getup'),
+            targetValue: item?.targetValue || def.targetValue,
+            isAlarm: item.isAlarm,
+            startTime: item.startTime || '08:00',
+            endTime: '00:00',
+            frequency: item.frequency || '1,2,3,4,5,6,7',
+            isInit: true,
+            step: def.step,
+            finValue: item.finValue || '0',
+            customName: def.taskName,
+            customIcon: def.icon,
+            customUnit: def.unit
+          };
+          router.pushUrl({ url: 'pages/TaskEditPage', params: { params: JSON.stringify(editTask) } });
+        }
+      }
     }
   }
 
@@ -131,6 +159,22 @@ export default struct HomeIndex {
     }
   }
 
+  getTaskDisplayName(taskID: number): string {
+    if (taskID >= 8) {
+      const def: CustomTaskDef | null = getCustomTaskSync(taskID);
+      return def ? def.taskName : '';
+    }
+    return '';
+  }
+
+  getTaskDisplayIcon(taskID: number): string {
+    if (taskID >= 8) {
+      const def: CustomTaskDef | null = getCustomTaskSync(taskID);
+      return def ? def.icon : '';
+    }
+    return '';
+  }
+
   build() {
     Stack() {
       Scroll(this.scroller) {
@@ -149,6 +193,8 @@ export default struct HomeIndex {
               ForEach(this.homeStore.getTaskListOfDay(), (item: TaskInfo) => {
                 TaskCard({
                   taskInfoStr: JSON.stringify(item),
+                  customTaskName: this.getTaskDisplayName(item.taskID),
+                  customTaskIcon: this.getTaskDisplayIcon(item.taskID),
                   clickAction: (isClick: boolean) => this.taskItemAction(item, isClick)
                 })
                   .margin({ bottom: Const.DEFAULT_12 })

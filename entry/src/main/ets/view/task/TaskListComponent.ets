@@ -28,13 +28,25 @@ export default struct TaskList {
         ListItem() {
           Row() {
             Row() {
-              Image(item?.icon)
-                .width(Const.DEFAULT_24)
-                .height(Const.DEFAULT_24)
-                .margin({ right: Const.DEFAULT_8 })
-              Text(item?.taskName)
-                .fontSize(Const.DEFAULT_20)
-                .fontColor($r('app.color.titleColor'))
+              if (item?.customIcon) {
+                Text(item.customIcon)
+                  .fontSize(22)
+                  .margin({ right: Const.DEFAULT_8 })
+              } else {
+                Image(item?.icon)
+                  .width(Const.DEFAULT_24)
+                  .height(Const.DEFAULT_24)
+                  .margin({ right: Const.DEFAULT_8 })
+              }
+              if (item?.customName) {
+                Text(item.customName)
+                  .fontSize(Const.DEFAULT_20)
+                  .fontColor($r('app.color.titleColor'))
+              } else {
+                Text(item?.taskName)
+                  .fontSize(Const.DEFAULT_20)
+                  .fontColor($r('app.color.titleColor'))
+              }
             }
             .width(Const.THOUSANDTH_500)
 
@@ -59,12 +71,16 @@ export default struct TaskList {
         .height(Const.THOUSANDTH_80)
         .borderRadius(Const.DEFAULT_12)
         .onClick(() => {
-          router.pushUrl({
-            url: 'pages/TaskEditPage',
-            params: {
-              params: formatParams(item)
-            }
-          })
+          if (item.taskID === 0) {
+            router.pushUrl({ url: 'pages/CustomTaskCreatePage' });
+          } else {
+            router.pushUrl({
+              url: 'pages/TaskEditPage',
+              params: {
+                params: formatParams(item)
+              }
+            })
+          }
         })
         .backgroundColor($r('app.color.white'))
       }, (item: ITaskItem) => JSON.stringify(item))
