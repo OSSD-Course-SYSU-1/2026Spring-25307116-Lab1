@@ -15,7 +15,7 @@
 - **技术栈**: ArkTS · ArkUI · @ObservedV2 · DeepSeek API + Vercel 代理
 - **特点**: 从零完整构建，18+ 项功能，20 次提交，架构解耦清晰
 
-### OnTrack（ky 分支）— 从零构建
+### OnTrack（ontrack分支）— 从零构建
 
 火车路线查询应用。全国 16,109 趟列车数据，Dijkstra 最小堆换乘搜索 + 直达标 O(n) 扫描，站名自动补全，Canvas 路线图，桌面 Widget，原子化服务。
 
